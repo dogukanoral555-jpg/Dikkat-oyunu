@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dikkat ve Hızlı Karar Oyunu</title>
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+    }
+    #gameArea {
+        width: 100vw;
+        height: 100vh;
+        background: #f0f0f0;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #startBtn, #restartBtn {
+        padding: 15px 30px;
+        font-size: 20px;
+        border: none;
+        background: #007bff;
+        color: white;
+        border-radius: 10px;
+        cursor: pointer;
+        z-index: 10;
+    }
+    #dot {
+        width: 95px; /* 2.5 cm yaklaşık */
+        height: 95px;
+        border-radius: 50%;
+        background: blue;
+        position: absolute;
+    }
+    #lives, #score {
+        position: absolute;
+        top: 10px;
+        font-size: 22px;
+        font-weight: bold;
+        z-index: 10;
+    }
+    #lives {
+        left: 10px;
+    }
+    #score {
+        right: 10px;
+    }
+</style>
+</head>
+<body>
+<div id="gameArea">
+    <button id="startBtn">Başlat</button>
+    <div id="lives" style="display:none;">Can: 3</div>
+    <div id="score" style="display:none;">Skor: 0</div>
+</div>
+
+<script>
+    const gameArea = document.getElementById("gameArea");
+    const startBtn = document.getElementById("startBtn");
+    const livesText = document.getElementById("lives");
+    const scoreText = document.getElementById("score");
+
+    let lives = 3;
+    let score = 0;
+    let dot;
+    let timer;
+
+    function startGame() {
+        startBtn.style.display = "none";
+        lives = 3;
+        score = 0;
+        livesText.textContent = "Can: " + "❤".repeat(lives);
+        scoreText.textContent = "Skor: " + score;
+        livesText.style.display = "block";
+        scoreText.style.display = "block";
+        spawnDot();
+    }
+
+    function spawnDot() {
+        if (dot) dot.remove();
+        dot = document.createElement("div");
+        dot.id = "dot";
+
+        const areaWidth = gameArea.clientWidth;
+        const areaHeight = gameArea.clientHeight;
+        const dotSize = 95;
+
+        const x = Math.random() * (areaWidth - dotSize);
+        const y = Math.random() * (areaHeight - dotSize);
+
+        dot.style.left = x + "px";
+        dot.style.top = y + "px";
+
+        gameArea.appendChild(dot);
+
+        dot.addEventListener("click", () => {
+            score++;
+            scoreText.textContent = "Skor: " + score;
+            clearTimeout(timer);
+            spawnDot();
+        });
+
+        timer = setTimeout(() => {
+            lives--;
+            livesText.textContent = "Can: " + "❤".repeat(lives);
+            if (lives <= 0) endGame();
+            else spawnDot();
+        }, 1000);
+    }
+
+    function endGame() {
+        if (dot) dot.remove();
+        clearTimeout(timer);
+
+        const loseText = document.createElement('div');
+        loseText.textContent = 'Kaybettiniz';
+        loseText.style.position = 'absolute';
+        loseText.style.top = '40%';
+        loseText.style.left = '50%';
+        loseText.style.transform = 'translateX(-50%)';
+        loseText.style.fontSize = '40px';
+        loseText.style.fontWeight = 'bold';
+        loseText.style.zIndex = '10';
+        gameArea.appendChild(loseText);
+
+        const restartBtn = document.createElement("button");
+        restartBtn.id = "restartBtn";
+        restartBtn.textContent = "Yeniden Başlat";
+        restartBtn.style.position = 'absolute';
+        restartBtn.style.top = '55%';
+        restartBtn.style.left = '50%';
+        restartBtn.style.transform = 'translateX(-50%)';
+        gameArea.appendChild(restartBtn);
+
+        restartBtn.addEventListener("click", () => {
+            loseText.remove();
+            restartBtn.remove();
+            startGame();
+        });
+    }
+
+    startBtn.addEventListener("click", startGame);
+</script>
+</body>
+</html>
